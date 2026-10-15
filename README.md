@@ -1,44 +1,106 @@
-# telegram-ai
+<div align="center">
 
-Talk to **Claude Code** and **OpenAI Codex** from Telegram — on your existing
-subscription, not a metered API key.
+# Telegram AI
 
-Four small, independent projects. They share design ideas (and a couple of
-helper scripts) but no code coupling — pick the one you want:
+### Claude Code and OpenAI Codex, carried in your pocket.
 
-|            | Bot-API bridge — you DM a bot | Userbot module — `.ask` in any chat |
-|------------|-------------------------------|-------------------------------------|
-| **Claude** | [claude-telegram-bridge](https://github.com/maleon17/claude-telegram-bridge) | [claude-ask](https://github.com/maleon17/claude-ask) |
-| **Codex**  | [codex-telegram-bridge](https://github.com/maleon17/codex-telegram-bridge)   | [codex-ask](https://github.com/maleon17/codex-ask)   |
+Persistent coding-agent sessions from Telegram, using your existing subscriptions rather than metered API keys.
 
-### Bridges (`*-telegram-bridge`)
+Watch work happen live. Steer Codex mid-turn. Resume native sessions later. Move files in both directions. Let the agents work on the machine where your projects actually live.
 
-A Bot-API bot you message directly. Holds one persistent CLI session per chat,
-streams tool calls and progress live, and manages sessions, models and
-permissions — plus, on the Claude side, multi-tenant isolated accounts. Runs
-`claude -p` / `codex app-server` under your subscription login.
+[Claude Bridge](https://github.com/maleon17/claude-telegram-bridge) · [Codex Bridge](https://github.com/maleon17/codex-telegram-bridge) · [ClaudeAsk](https://github.com/maleon17/claude-ask) · [CodexAsk](https://github.com/maleon17/codex-ask)
 
-### Userbots (`*-ask`)
+</div>
 
-A Telethon / Hikka module loaded into your own account. `.ask <question>` in
-**any** chat; the reply edits your own message in place, so it reads as if you
-typed it. Carries a configurable "Jarvis" persona and real Telegram actions
-(read history, send files, manage groups, auto-reply triggers) via MCP tools.
+---
 
-## Which one?
+## More than “AI in Telegram”
 
-- Just want to chat with Claude/Codex from your phone → a **bridge**.
-- Want it inline in group chats, answering as you → an **`*-ask`** userbot.
-- They can run side by side; the only link is an optional file-channel
-  (`bridge_exec.py`) for handing a task from one to the other.
+The bridge projects turn Telegram into a **remote engineering console** for Claude Code and Codex. They run persistent CLI/App Server processes and preserve native sessions across restarts instead of treating every message as a stateless API call.
 
-## Install
+The userbot projects take the other route: invoke Claude or Codex **inside ordinary Telegram conversations** through your own Telethon account, with real Telegram actions exposed through MCP.
 
-Each repo is self-contained: `git clone`, run `setup.sh`, follow its README.
-The userbots additionally need their backend (`*_watcher.py` plus the shared
-`cmd_queue.py` HTTP relay) running on a host you control.
+## The ecosystem
+
+| | **Bot API bridge** | **Userbot / inline assistant** |
+|---|---|---|
+| **Claude Code** | **[claude-telegram-bridge](https://github.com/maleon17/claude-telegram-bridge)**<br>Persistent Claude sessions, live tool progress, permission modes, isolated accounts and file delivery. | **[claude-ask](https://github.com/maleon17/claude-ask)**<br>Use `.ask` from ordinary chats; a Claude Code worker resumes each chat's session and can perform Telegram actions through your Telethon session. |
+| **OpenAI Codex** | **[codex-telegram-bridge](https://github.com/maleon17/codex-telegram-bridge)**<br>Persistent Codex App Server threads, compaction, sandbox/model controls, isolated accounts and file delivery. | **[codex-ask](https://github.com/maleon17/codex-ask)**<br>Use `.xask` inline, backed by persistent Codex threads and the Telegram-action layer. |
+
+They are intentionally separate projects. Install one, mix two, or run the whole mildly unreasonable machine.
+
+## Choose and install
+
+Use a **bridge** for a dedicated bot conversation with the coding agent. Use a **userbot** to invoke `.ask` or `.xask` inside your existing chats through your own Telegram account; it edits your message in place with the answer. The two approaches can run side by side.
+
+Each repository has its own `setup.sh` and installation guide. The userbots also require a Telethon/Hikka host, their backend worker and the shared authenticated `cmd_queue.py` relay; follow the selected userbot repository's README for the deployment order.
+
+## How it feels
+
+```mermaid
+flowchart LR
+    U["You<br/>Telegram"] --> B["Bridge<br/>persistent session"]
+    B --> A["Claude Code<br/>or Codex"]
+    A --> T["Tools · shell · files · code"]
+    T --> A
+    A --> B --> U
+    A -. "Claude Bridge delegation" .-> D["another agent / session"]
+    D -. "result + resumable context" .-> A
+```
+
+A turn is not a black box. Progress and tool activity are visible while work happens. Codex Bridge also accepts new input during an active turn, so the user can correct assumptions before the agent has enthusiastically automated the wrong thing.
+
+## What you can do from the phone
+
+- **Keep real sessions alive.** Create, list and resume native Claude/Codex sessions; state survives bot restarts.
+- **Watch work live.** Tool calls and progress are streamed while the agent works.
+- **Control the runtime.** Change model, reasoning effort, workspace and the bridge's permission or sandbox policy without SSH.
+- **Move actual artifacts.** Send photos and documents to the agent and receive generated files back.
+- **Interrupt safely.** Stop active work, compact context, or use deferred restarts.
+- **Use multiple accounts.** Isolate whitelisted users into separate accounts, sessions and subscription limits.
+- **Act inside Telegram.** The `*-ask` projects expose Telegram actions through the user's Telethon session.
+- **Delegate through Claude Bridge.** Its optional `bridge_exec.py` path returns the result and a session ID for resuming delegated work.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Telegram
+      CBOT["Claude bot chat"]
+      XBOT["Codex bot chat"]
+      USER["Your Telethon account<br/>.ask / .xask"]
+    end
+    subgraph Bridges
+      CB["Claude Telegram Bridge"]
+      XB["Codex Telegram Bridge"]
+    end
+    subgraph Userbot
+      CA["ClaudeAsk"]
+      XA["CodexAsk"]
+      R["Authenticated queue relay"]
+    end
+    subgraph Agents
+      C["Claude Code CLI"]
+      X["Codex App Server"]
+    end
+    CBOT --> CB --> C
+    XBOT --> XB --> X
+    USER --> CA --> R --> CW["Claude worker"] --> C
+    USER --> XA --> R --> XW["Codex worker"] --> X
+    CW <--> R
+    XW <--> R
+    R <--> CA
+    R <--> XA
+```
+
+## Philosophy
+
+**The phone should be a control surface, not the computer doing the work.**
+
+The agents stay on the host with the repositories, shell, tools and persistent sessions. Telegram provides the human loop: give direction, observe progress, correct assumptions, approve or stop work, and receive the result.
+
+The point is not to squeeze a coding CLI into a chat bubble. It is to make a remote agent workflow practical enough to use every day.
 
 ## Contributing
 
-Fork the repo you're changing and open a PR there. If you run a modified copy
-for your own deployment, keep it on a fork rather than a local divergence.
+Changes belong in the repository that owns the feature. Fork that repository and open a PR there. The projects are kept independent on purpose, so improvements should not create unnecessary cross-repository coupling.
