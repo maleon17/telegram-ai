@@ -75,22 +75,26 @@ flowchart TB
       XB["Codex Telegram Bridge"]
     end
     subgraph Userbot
-      CA["ClaudeAsk"]
       XA["CodexAsk"]
+      CA["ClaudeAsk"]
       R["Authenticated queue relay"]
     end
     subgraph Agents
       C["Claude Code CLI"]
       X["Codex App Server"]
     end
-    CBOT --> CB --> C
-    XBOT --> XB --> X
-    USER --> CA --> R --> CW["Claude worker"] --> C
-    USER --> XA --> R --> XW["Codex worker"] --> X
-    CW <--> R
-    XW <--> R
-    R <--> CA
-    R <--> XA
+    CBOT <--> CB
+    CB <--> C
+    XBOT <--> XB
+    XB <--> X
+    USER <--> XA
+    USER <--> CA
+    XA <--> R
+    CA <--> R
+    R <--> CW["Claude worker"]
+    R <--> XW["Codex worker"]
+    CW <--> C
+    XW <--> X
 ```
 
 ## Philosophy
