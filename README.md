@@ -33,13 +33,20 @@ Watch work happen live. Steer it mid-turn. Resume sessions later. Move files bot
 
 Every project installs with one command — `./setup.sh` in its repository — and works on its own. The userbots fetch **[telegram-ai-core](https://github.com/maleon17/telegram-ai-core)**, their shared engine, by themselves.
 
+## What you need
+
+- A Linux server with `systemd`, `git` and Python 3.10+.
+- The agent you want, logged in on that server: [Claude Code](https://claude.com/claude-code) with a Claude subscription, and/or the [Codex CLI](https://developers.openai.com/codex/cli/) with ChatGPT.
+- For a bridge: a bot token from [@BotFather](https://t.me/BotFather).
+- For ClaudeAsk / CodexAsk: a [Heroku](https://github.com/coddrago/Heroku) userbot. The installer can create one in Docker on the same server; one on another server connects over [Tailscale](https://tailscale.com), which the module installs and logs in by itself — you only open the login link it sends.
+
 ## Better together
 
 Installed on the same server, the parts find each other automatically and add:
 
 - **Bridge ↔ bridge** — Claude can hand a task to Codex (and back) for the same user, wait for the answer and carry on with it.
-- **Bridge → your Telegram account** — if you own a userbot, the agent in *your* bridge chat can act in your account through it.
-- **Userbot → bridge** — `.ask` can pass a bigger job to your coding agent in the bridge, which has your projects and no time limit, and bring back its answer.
+- **Bridge → your Telegram account** — if you own a userbot, the agent in *your* chat with either bridge can act in your account through it.
+- **Userbot → bridge** — `.ask` / `.xask` can pass a bigger job to your coding agent in a bridge, which has your projects and no time limit, and bring back its answer.
 - **ClaudeAsk + CodexAsk** — shared triggers with one coordinated reaction per message, and automatic fallback to the other engine on failure.
 
 Each person only ever reaches their own accounts: who owns which userbot is decided on the server, not by the model, and automated triggers can never delegate work.
@@ -74,7 +81,9 @@ flowchart TB
     R <--> XW["Codex worker"] <--> X
     CB <-. "delegate" .-> XB
     R -. "delegate_to_bridge" .-> CB
+    R -. "delegate_to_bridge" .-> XB
     CB -. "Telegram actions" .-> R
+    XB -. "Telegram actions" .-> R
 ```
 
 ## Philosophy
