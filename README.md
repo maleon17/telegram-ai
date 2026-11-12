@@ -53,38 +53,10 @@ Each person only ever reaches their own accounts: who owns which userbot is deci
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    subgraph Telegram
-      CBOT["Claude bot chat"]
-      XBOT["Codex bot chat"]
-      USER["Your account<br/>.ask / .xask"]
-    end
-    subgraph Bridges
-      CB["Claude Telegram Bridge"]
-      XB["Codex Telegram Bridge"]
-    end
-    subgraph Userbot["Userbot + telegram-ai-core"]
-      CA["ClaudeAsk"]
-      XA["CodexAsk"]
-      R["Queue relay"]
-    end
-    subgraph Agents
-      C["Claude Code"]
-      X["Codex App Server"]
-    end
-    CBOT <--> CB <--> C
-    XBOT <--> XB <--> X
-    USER <--> CA <--> R
-    USER <--> XA <--> R
-    R <--> CW["Claude worker"] <--> C
-    R <--> XW["Codex worker"] <--> X
-    CB <-. "delegate" .-> XB
-    R -. "delegate_to_bridge" .-> CB
-    R -. "delegate_to_bridge" .-> XB
-    CB -. "Telegram actions" .-> R
-    XB -. "Telegram actions" .-> R
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
+  <img alt="Telegram talks to the Claude and Codex bridges and to your userbot; the userbot talks to telegram-ai-core (queue relay and Telegram actions MCP), which runs Claude Code and the Codex App Server through their workers; the bridges delegate to each other, and through the core they act in your Telegram account and take tasks from your userbot." src="docs/architecture-light.svg" width="860">
+</picture>
 
 ## Philosophy
 
