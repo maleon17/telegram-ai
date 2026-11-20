@@ -31,7 +31,7 @@ Watch work happen live. Steer it mid-turn. Resume sessions later. Move files bot
 - *"I want an assistant in my Telegram conversations."* → **ClaudeAsk** or **CodexAsk**. You need a [Heroku](https://github.com/coddrago/Heroku) userbot; their installer can set one up in Docker for you.
 - *"Both, and they should work together."* → install several on one server. Order does not matter.
 
-Every project installs with one command — `./setup.sh` in its repository — and works on its own. The userbots fetch **[telegram-ai-core](https://github.com/maleon17/telegram-ai-core)**, their shared engine, by themselves.
+Every project installs with one command — `./setup.sh` in its repository — and works on its own. The userbots fetch **[telegram-ai-core](https://github.com/maleon17/telegram-ai-core)**, their shared engine, by themselves. The install guides clone into hidden folders in your home directory (for example `~/.claude-ask`) to keep it tidy; each installer records where it lives in a shared registry, so the parts find each other wherever they are.
 
 ## What you need
 
